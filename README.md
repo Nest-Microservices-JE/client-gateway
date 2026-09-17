@@ -1,114 +1,185 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Client Gateway
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+API Gateway desarrollado con NestJS para la arquitectura de microservicios de la aplicación de productos. Este servicio actúa como el punto de entrada HTTP para los clientes, validando peticiones, transformando excepciones y enrutando los mensajes hacia los microservicios correspondientes mediante comunicación RPC (TCP).
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+---
 
-## Description
+## Características principales
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- Puerta de Enlace HTTP (API Gateway): Expone endpoints RESTful con el prefijo global `/api`.
+- Comunicación mediante Microservicios RPC: Conexión mediante transporte TCP con el microservicio de productos (`PRODUCT_SERVICE`).
+- Validación Estricta de Datos: Uso de `ValidationPipe` global con `whitelist` y `forbidNonWhitelisted` mediante `class-validator` y `class-transformer`.
+- Validación de Variables de Entorno: Configuración con `dotenv` y validación estricta del esquema mediante `Joi`.
+- Manejo Centralizado de Excepciones RPC: Filtro global de excepciones `RpcCustomExceptionFilter` para convertir errores RPC devueltos por los microservicios en respuestas HTTP limpias y estructuradas con su correspondiente código de estado HTTP.
+- Paginación reutilizable: DTO genérico de paginación (`PaginationDto`) para consultas de listado.
 
-## Project setup
+---
 
-```bash
-$ npm install
+## Requisitos previos
+
+- Node.js (versión LTS recomendada)
+- npm
+- Microservicio de Productos en ejecución (Products Microservice)
+
+---
+
+## Variables de Entorno
+
+Crea un archivo `.env` en la raíz del proyecto basado en `.env.template`:
+
+```env
+PORT=3000
+PRODUCT_MICROSERVICE_HOST=localhost
+PRODUCT_MICROSERVICE_PORT=3001
 ```
 
-## Compile and run the project
+### Descripción de variables
+
+| Variable | Descripción | Valor por defecto / Ejemplo |
+| --- | --- | --- |
+| `PORT` | Puerto en el que se ejecuta el API Gateway | `3000` |
+| `PRODUCT_MICROSERVICE_HOST` | Host o dirección donde escucha el microservicio de productos | `localhost` |
+| `PRODUCT_MICROSERVICE_PORT` | Puerto TCP donde escucha el microservicio de productos | `3001` |
+
+---
+
+## Instalación y Configuración
+
+1. Clonar el repositorio e ingresar al directorio del proyecto:
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+cd client-gateway
 ```
 
-## Run tests
+2. Instalar las dependencias:
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+npm install
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+3. Crear y configurar el archivo de variables de entorno:
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+cp .env.template .env
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+---
 
-## Observability
+## Ejecución del Proyecto
 
-In production applications, observability is essential for understanding how your system behaves, detecting issues early, and maintaining reliable performance.
+### Modo Desarrollo (con Live Reload)
 
-[NestJS Observe](https://observe.nestjs.com) automatically instruments your NestJS application, giving you deep visibility into your system with minimal setup:
+```bash
+npm run start:dev
+```
 
-- **Distributed tracing:** Follow requests across services and understand how they flow through your system.
-- **Waterfall analysis:** Visualize request execution and identify slow operations, bottlenecks, and unexpected delays.
-- **Performance analysis:** Analyze application performance in real time and quickly pinpoint areas that need optimization.
-- **Metrics:** Track key application and infrastructure metrics to understand system health and performance trends.
-- **Logging:** Centralize and correlate logs with traces and other telemetry to make debugging easier.
-- **Error tracking:** Detect errors quickly and investigate their root causes with the surrounding context.
-- **SLA monitoring:** Track service-level objectives and identify when your application is approaching or exceeding defined thresholds.
-- **Alarms and alerts:** Set up alerts for critical errors, performance degradation, SLA violations, and other anomalies so your team can react quickly.
+### Modo Producción
 
-## Resources
+```bash
+npm run build
+npm run start:prod
+```
 
-Check out a few resources that may come in handy when working with NestJS:
+### Pruebas y Linter
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Auto-instrument your application with [NestJS Observer](https://observer.nestjs.com). Distributed tracing, metrics, and logging made easy. Error tracking and performance monitoring for your NestJS applications.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+```bash
+# Ejecutar linter (oxlint)
+npm run lint
 
-## Support
+# Formatear código (prettier)
+npm run format
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+# Pruebas unitarias
+npm run test
 
-## Stay in touch
+# Pruebas e2e
+npm run test:e2e
+```
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+---
 
-## License
+## Endpoints de la API
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+La ruta base de la API es `/api/products`.
+
+### Productos (`/api/products`)
+
+#### 1. Crear un producto
+- Método: `POST`
+- Ruta: `/api/products`
+- Cuerpo de la petición (JSON):
+  ```json
+  {
+    "name": "Teclado Mecánico",
+    "price": 59.99
+  }
+  ```
+- Patrón RPC enviado: `{ cmd: 'create_product' }`
+
+#### 2. Obtener todos los productos
+- Método: `GET`
+- Ruta: `/api/products`
+- Parámetros de consulta (Query Params - Opcionales):
+  - `page`: Número de página (ej. `1`)
+  - `limit`: Cantidad de elementos por página (ej. `10`)
+- Ejemplo: `/api/products?page=1&limit=5`
+- Patrón RPC enviado: `{ cmd: 'find_all_products' }`
+
+#### 3. Obtener un producto por ID
+- Método: `GET`
+- Ruta: `/api/products/:id`
+- Ejemplo: `/api/products/1`
+- Patrón RPC enviado: `{ cmd: 'find_one_product' }`
+
+#### 4. Actualizar un producto
+- Método: `PATCH`
+- Ruta: `/api/products/:id`
+- Cuerpo de la petición (JSON):
+  ```json
+  {
+    "name": "Teclado Mecánico RGB",
+    "price": 64.99
+  }
+  ```
+- Patrón RPC enviado: `{ cmd: 'update_product' }`
+
+#### 5. Eliminar un producto
+- Método: `DELETE`
+- Ruta: `/api/products/:id`
+- Ejemplo: `/api/products/1`
+- Patrón RPC enviado: `{ cmd: 'delete_product' }`
+
+---
+
+## Estructura del Proyecto
+
+```text
+src/
+├── common/
+│   ├── dto/
+│   │   └── pagination.dto.ts         # DTO para parámetros de paginación (page, limit)
+│   ├── exceptions/
+│   │   └── rpc-custom-exception.filter.ts # Filtro global para transformar RpcException a HTTP Exception
+│   └── index.ts
+├── config/
+│   ├── envs.ts                       # Validación y exportación de variables de entorno con Joi
+│   ├── services.ts                   # Definición de tokens de inyección (PRODUCT_SERVICE)
+│   └── index.ts
+├── products/
+│   ├── dto/
+│   │   ├── create-product.dto.ts     # DTO para creación de productos
+│   │   └── update-product.dto.ts     # DTO para actualización parcial de productos
+│   ├── products.controller.ts        # Controlador REST que redirige solicitudes al microservicio
+│   └── products.module.ts            # Módulo de productos con registro de ClientProxy (TCP)
+├── app.module.ts                     # Módulo principal de la aplicación
+└── main.ts                           # Punto de entrada de NestJS (configuración de pipes, filtros, puerto)
+```
+
+---
+
+## Arquitectura y Flujo de Manejo de Errores
+
+1. El cliente realiza una petición HTTP al Gateway (`/api/products`).
+2. El `ValidationPipe` valida el cuerpo y parámetros de la solicitud.
+3. El `ProductsController` delega la petición al microservicio mediante `ClientProxy` emitiendo un patrón de comando RPC por TCP (ej. `{ cmd: 'find_one_product' }`).
+4. Si el microservicio responde con un error RPC (`RpcException`), el filtro personalizado `RpcCustomExceptionFilter` intercepta la excepción en el Gateway y devuelve una respuesta estructurada al cliente con el código HTTP correspondiente (`400 Bad Request`, `404 Not Found`, etc.), evitando respuestas genéricas 500.
