@@ -183,3 +183,7 @@ src/
 2. El `ValidationPipe` valida el cuerpo y parámetros de la solicitud.
 3. El `ProductsController` delega la petición al microservicio mediante `ClientProxy` emitiendo un patrón de comando RPC por TCP (ej. `{ cmd: 'find_one_product' }`).
 4. Si el microservicio responde con un error RPC (`RpcException`), el filtro personalizado `RpcCustomExceptionFilter` intercepta la excepción en el Gateway y devuelve una respuesta estructurada al cliente con el código HTTP correspondiente (`400 Bad Request`, `404 Not Found`, etc.), evitando respuestas genéricas 500.
+
+
+## Levantar servidor NATS 
+docker run -d --name nats-main -p 4222:4222 -p 6222:6222 -p 8222:8222 nats
